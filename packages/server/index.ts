@@ -11,6 +11,10 @@ const port = Number(process.env.SERVER_PORT) || 3001
 
 createClientAndConnect()
 
+app.get('/data', (_, res) => {
+  res.json({ text: 'Текст с сервера' })
+})
+
 app.get('/', (_, res) => {
   res.json('👋 Howdy from the server :)')
 })
