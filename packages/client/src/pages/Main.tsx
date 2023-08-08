@@ -1,8 +1,7 @@
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import './App.css'
 
-function App() {
+export const MainPage = () => {
   useEffect(() => {
     const fetchServerData = async () => {
       const url = `http://localhost:${__SERVER_PORT__}`
@@ -21,6 +20,4 @@ function App() {
       <p>{text}</p>
     </div>
   )
-}
-
-export default App
+};

@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-import express from 'express'
+import express, {Request} from 'express'
 import axios from 'axios'
 import path from 'path'
 import fs from 'fs/promises'
@@ -35,7 +35,7 @@ async function createServer() {
     const url = req.originalUrl
 
     try {
-      let render: (data: State) => Promise<string>
+      let render: (data: State, req: Request) => Promise<string>
       let template: string
 
       if (vite) {
@@ -72,7 +72,7 @@ async function createServer() {
       const { data } = await axios.get('http://localhost:3001/data')
 
       // Получаем HTML-строку из JSX
-      const appHtml = await render(data)
+      const appHtml = await render(data, req)
 
       // Заменяем наш комментарий на сгенерированную HTML-строку
       const html = template
