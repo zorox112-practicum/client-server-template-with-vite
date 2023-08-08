@@ -7,12 +7,14 @@ import * as path from 'path'
 import * as fs from 'fs/promises'
 import { createServer as createViteServer } from 'vite'
 import type { ViteDevServer } from 'vite'
+import type { State } from '../shared/types'
 
 const port = Number(process.env.SERVER_PORT) || 3001
 const pathToShared = path.resolve('../shared')
 const clientPath = path.resolve('../client')
 const isDev = process.env.NODE_ENV === 'development'
 
+const data: State = {text: 'Текст с сервера'};
 async function createServer() {
   const app = express()
   app.use(cors())
@@ -36,7 +38,7 @@ async function createServer() {
     const url = req.originalUrl
 
     try {
-      let render: () => Promise<string>
+      let render: (data: State) => Promise<string>
       let template: string
       if (vite) {
         // Получаем файл client/index.html который мы правили ранее
@@ -66,10 +68,13 @@ async function createServer() {
       }
 
       // Получаем HTML-строку из JSX
-      const appHtml = await render()
+      const appHtml = await render(data)
 
       // Заменяем наш комментарий на сгенерированную HTML-строку
-      const html = template.replace(`<!--ssr-outlet-->`, appHtml)
+      const html = template.replace(`<!--ssr-outlet-->`, appHtml).replace(
+        `<!--ssr-initial-state-->`,
+        `<script>window.APP_INITIAL_STATE = ${JSON.stringify(data)}</script>`
+      )
 
       // Завершаем запрос и отдаем HTML-страницу
       res.status(200).set({ 'Content-Type': 'text/html' }).end(html)

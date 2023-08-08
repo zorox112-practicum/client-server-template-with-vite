@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import './App.css'
 
 function App() {
@@ -12,7 +13,8 @@ function App() {
 
     fetchServerData()
   }, [])
-  return <div className="App">Вот тут будет жить ваше приложение :)</div>
+  const { text } = useSelector(state => state)
+  return <><div className="App">Вот тут будет жить ваше приложение :)</div><p>{text}</p></>
 }
 
 export default App
