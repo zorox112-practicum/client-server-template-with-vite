@@ -1,15 +1,13 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-import express from 'express'
-import axios from 'axios'
+import express, { Request } from 'express'
 import path from 'path'
 import fs from 'fs/promises'
 import { createServer as createViteServer } from 'vite'
 import type { ViteDevServer } from 'vite'
-import { State } from '../src/store'
 
-const port = 80
+const port = process.env.CLIENT_PORT || 80
 const clientPath = path.join(__dirname, '..')
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -35,7 +33,9 @@ async function createServer() {
     const url = req.originalUrl
 
     try {
-      let render: (data: State) => Promise<string>
+      let render: (
+        req: Request
+      ) => Promise<{ html: string; initialState: unknown }>
       let template: string
 
       if (vite) {
@@ -69,17 +69,18 @@ async function createServer() {
         // Импортируем этот модуль и вызываем с инишл стейтом
         render = (await import(pathToServer)).render
       }
-      const { data } = await axios.get('http://localhost:3001/data')
 
       // Получаем HTML-строку из JSX
-      const appHtml = await render(data)
+      const { html: appHtml, initialState } = await render(req)
 
       // Заменяем наш комментарий на сгенерированную HTML-строку
       const html = template
         .replace(`<!--ssr-outlet-->`, appHtml)
         .replace(
           `<!--ssr-initial-state-->`,
-          `<script>window.APP_INITIAL_STATE = ${JSON.stringify(data)}</script>`
+          `<script>window.APP_INITIAL_STATE = ${JSON.stringify(
+            initialState
+          )}</script>`
         )
 
       // Завершаем запрос и отдаем HTML-страницу

@@ -1,0 +1,53 @@
+import { useSelector } from '../store'
+import { Header } from '../components/Header'
+import { usePage } from '../hooks/usePage'
+import {
+  fetchFriendsThunk,
+  selectFriends,
+  selectIsLoadingFriends,
+} from '../slices/friendsSlice'
+import { fetchUserThunk, selectUser } from '../slices/userSlice'
+import { PageInitPageArgs } from '../routes'
+
+export const FriendsPage = () => {
+  const friends = useSelector(selectFriends)
+  const isLoading = useSelector(selectIsLoadingFriends)
+  const user = useSelector(selectUser)
+
+  usePage({ initPage: initFriendsPage })
+
+  return (
+    <div className="App">
+      <Header />
+      {user ? (
+        <>
+          <h3>Информация о пользователе:</h3>{' '}
+          <p>
+            {user.name} {user.secondName}
+          </p>
+        </>
+      ) : (
+        <h3>Пользователь не найден</h3>
+      )}
+      {isLoading ? (
+        'Загрузка списка...'
+      ) : (
+        <ul>
+          {friends.map(friend => (
+            <li key={friend.name}>
+              {friend.name} {friend.secondName}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+export const initFriendsPage = ({ dispatch, state }: PageInitPageArgs) => {
+  const queue: Array<Promise<unknown>> = [dispatch(fetchFriendsThunk())]
+  if (!selectUser(state)) {
+    queue.push(dispatch(fetchUserThunk()))
+  }
+  return Promise.all(queue)
+}
