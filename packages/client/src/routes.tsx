@@ -4,9 +4,14 @@ import { initMainPage, MainPage } from './pages/Main'
 import { initFriendsPage, FriendsPage } from './pages/FriendsPage'
 import { initNotFoundPage, NotFoundPage } from './pages/NotFound'
 
-export type PageInitPageArgs = {
+export type PageInitContext = {
+  clientToken?: string
+}
+
+export type PageInitArgs = {
   dispatch: AppDispatch
   state: RootState
+  ctx: PageInitContext
 }
 
 export const routes = [

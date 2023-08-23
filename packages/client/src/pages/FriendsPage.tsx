@@ -7,7 +7,7 @@ import {
   selectIsLoadingFriends,
 } from '../slices/friendsSlice'
 import { fetchUserThunk, selectUser } from '../slices/userSlice'
-import { PageInitPageArgs } from '../routes'
+import { PageInitArgs } from '../routes'
 
 export const FriendsPage = () => {
   const friends = useSelector(selectFriends)
@@ -44,7 +44,7 @@ export const FriendsPage = () => {
   )
 }
 
-export const initFriendsPage = ({ dispatch, state }: PageInitPageArgs) => {
+export const initFriendsPage = ({ dispatch, state }: PageInitArgs) => {
   const queue: Array<Promise<unknown>> = [dispatch(fetchFriendsThunk())]
   if (!selectUser(state)) {
     queue.push(dispatch(fetchUserThunk()))

@@ -6,6 +6,8 @@ import path from 'path'
 import fs from 'fs/promises'
 import { createServer as createViteServer } from 'vite'
 import type { ViteDevServer } from 'vite'
+import cookieParser from 'cookie-parser'
+import serialize from 'serialize-javascript'
 
 const port = process.env.CLIENT_PORT || 80
 const clientPath = path.join(__dirname, '..')
@@ -14,6 +16,7 @@ const isDev = process.env.NODE_ENV === 'development'
 async function createServer() {
   const app = express()
 
+  app.use(cookieParser())
   let vite: ViteDevServer | undefined
   if (isDev) {
     vite = await createViteServer({
@@ -74,14 +77,12 @@ async function createServer() {
       const { html: appHtml, initialState } = await render(req)
 
       // Заменяем наш комментарий на сгенерированную HTML-строку
-      const html = template
-        .replace(`<!--ssr-outlet-->`, appHtml)
-        .replace(
-          `<!--ssr-initial-state-->`,
-          `<script>window.APP_INITIAL_STATE = ${JSON.stringify(
-            initialState
-          )}</script>`
-        )
+      const html = template.replace(`<!--ssr-outlet-->`, appHtml).replace(
+        `<!--ssr-initial-state-->`,
+        `<script>window.APP_INITIAL_STATE = ${serialize(initialState, {
+          isJSON: true,
+        })}</script>`
+      )
 
       // Завершаем запрос и отдаем HTML-страницу
       res.status(200).set({ 'Content-Type': 'text/html' }).end(html)

@@ -26,7 +26,6 @@ export const ssrSlice = createSlice({
 export const selectPageHasBeenInitializedOnServer = (state: RootState) =>
   state.ssr.pageHasBeenInitializedOnServer
 
-// Action creators are generated for each case reducer function
 export const { setPageHasBeenInitializedOnServer } = ssrSlice.actions
 
 export default ssrSlice.reducer

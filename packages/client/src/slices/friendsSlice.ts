@@ -20,32 +20,32 @@ const initialState: FriendsState = {
 
 export const fetchFriendsThunk = createAsyncThunk(
   'user/fetchFriendsThunk',
-  async (_: void, { dispatch }) => {
-    dispatch(friendsSlice.actions.fetchFriendsStart())
+  async (_: void) => {
     const url = `${SERVER_HOST}/friends`
-    console.log('url = ', url)
-    return fetch(url)
-      .then(res => res.json())
-      .then(res => dispatch(friendsSlice.actions.fetchFriendsSuccess(res)))
-      .catch(err => dispatch(friendsSlice.actions.fetchFriendsFail(err)))
+    return fetch(url).then(res => res.json())
   }
 )
 
 export const friendsSlice = createSlice({
   name: 'friends',
   initialState,
-  reducers: {
-    fetchFriendsStart: state => {
-      state.data = []
-      state.isLoading = true
-    },
-    fetchFriendsSuccess: (state, { payload }: PayloadAction<Friend[]>) => {
-      state.data = payload
-      state.isLoading = false
-    },
-    fetchFriendsFail: state => {
-      state.isLoading = false
-    },
+  reducers: {},
+  extraReducers: builder => {
+    builder
+      .addCase(fetchFriendsThunk.pending.type, state => {
+        state.data = []
+        state.isLoading = true
+      })
+      .addCase(
+        fetchFriendsThunk.fulfilled.type,
+        (state, { payload }: PayloadAction<Friend[]>) => {
+          state.data = payload
+          state.isLoading = false
+        }
+      )
+      .addCase(fetchFriendsThunk.rejected.type, state => {
+        state.isLoading = false
+      })
   },
 })
 
@@ -53,8 +53,5 @@ export const selectFriends = (state: RootState) => state.friends.data
 
 export const selectIsLoadingFriends = (state: RootState) =>
   state.friends.isLoading
-
-export const { fetchFriendsStart, fetchFriendsSuccess, fetchFriendsFail } =
-  friendsSlice.actions
 
 export default friendsSlice.reducer

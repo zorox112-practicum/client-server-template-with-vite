@@ -19,38 +19,35 @@ const initialState: UserState = {
 
 export const fetchUserThunk = createAsyncThunk(
   'user/fetchUserThunk',
-  async (_: void, { dispatch }) => {
-    dispatch(userSlice.actions.fetchUserStart())
+  async (_: void) => {
     const url = `${SERVER_HOST}/user`
-    console.log('url = ', url)
-    return fetch(url)
-      .then(res => res.json())
-      .then(res => dispatch(userSlice.actions.fetchUserSuccess(res)))
-      .catch(err => dispatch(userSlice.actions.fetchUserFail(err)))
+    return fetch(url).then(res => res.json())
   }
 )
 
 export const userSlice = createSlice({
   name: 'user',
   initialState,
-  reducers: {
-    fetchUserStart: state => {
-      state.data = null
-      state.isLoading = true
-    },
-    fetchUserSuccess: (state, { payload }: PayloadAction<User>) => {
-      state.data = payload
-      state.isLoading = false
-    },
-    fetchUserFail: state => {
-      state.isLoading = false
-    },
+  reducers: {},
+  extraReducers: builder => {
+    builder
+      .addCase(fetchUserThunk.pending.type, state => {
+        state.data = null
+        state.isLoading = true
+      })
+      .addCase(
+        fetchUserThunk.fulfilled.type,
+        (state, { payload }: PayloadAction<User>) => {
+          state.data = payload
+          state.isLoading = false
+        }
+      )
+      .addCase(fetchUserThunk.rejected.type, state => {
+        state.isLoading = false
+      })
   },
 })
 
 export const selectUser = (state: RootState) => state.user.data
-
-export const { fetchUserStart, fetchUserSuccess, fetchUserFail } =
-  userSlice.actions
 
 export default userSlice.reducer

@@ -1,9 +1,18 @@
 import { Request as ExpressRequest } from 'express'
+import { PageInitContext } from './routes'
 
-export function createFetchRequest(req: ExpressRequest) {
+export const createContext = (req: ExpressRequest): PageInitContext => ({
+  clientToken: req.cookies.token,
+})
+
+export const createUrl = (req: ExpressRequest) => {
   const origin = `${req.protocol}://${req.get('host')}`
-  // Note: This had to take originalUrl into account for presumably vite's proxying
-  const url = new URL(req.originalUrl || req.url, origin)
+
+  return new URL(req.originalUrl || req.url, origin)
+}
+
+export const createFetchRequest = (req: ExpressRequest) => {
+  const url = createUrl(req)
 
   const controller = new AbortController()
   req.on('close', () => controller.abort())
